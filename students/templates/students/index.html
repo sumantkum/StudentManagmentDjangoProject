@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- ... existing content ... -->
+
+<script>
+    function printTable() {
+        const table = document.getElementById('dataTable');
+        if (!table) {
+            alert("Table not found!");
+            return;
+        }
+
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank', 'width=900,height=700');
+        
+        // HTML content for print window with inline styles
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Student List</title>
+                <style>
+                    body { 
+                        padding: 20px; 
+                        font-family: Arial, sans-serif; 
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 20px;
+                    }
+                    th, td {
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: left;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                        font-weight: bold;
+                    }
+                    h2 {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .text-center {
+                        text-align: center;
+                    }
+                    .text-muted {
+                        color: #6c757d;
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>Student List</h2>
+                ${table.outerHTML}
+                <script>
+                    // Automatically trigger print when content loads
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function() {
+                            window.close();
+                        }, 500);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+    }
+</script>
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Student Management</h1>
+    <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal"
+        data-bs-target="#addStudentModal">
+        <i class="fas fa-plus fa-sm text-white-50"></i> Add Student
+    </button>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudentModalLabel">Add New Student</h5>
+                <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="studentForm">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="{{ form.name.id_for_label }}">Full Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="{{ form.roll_no.id_for_label }}">Roll Number</label>
+                        {{ form.roll_no }}
+                        {% if form.roll_no.errors %}
+                        <div class="text-danger small">{{ form.roll_no.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="{{ form.course.id_for_label }}">Course</label>
+                        {{ form.course }}
+                        {% if form.course.errors %}
+                        <div class="text-danger small">{{ form.course.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.errors %}
+                        <div class="text-danger small">{{ form.date_of_birth.errors }}</div>
+                        {% endif %}
+                    </div>
+
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" type="submit" form="studentForm">Add Student</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Student List -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Existing Students</h6>
+        <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i>Export to Excel</a>
+                <a class="dropdown-item" href="#" onclick="printTable()">
+                    <i class="fas fa-print me-2"></i>Print List
+                </a>
+
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Roll No</th>
+                        <th>Course</th>
+                        <th>Date of Birth</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr>
+                        <td>{{ s.name }}</td>
+                        <td>{{ s.email }}</td>
+                        <td>{{ s.roll_no }}</td>
+                        <td>{{ s.course }}</td>
+                        <td>
+                            {% if s.date_of_birth %}
+                            {{ s.date_of_birth|date:"Y-m-d" }}<br>
+                            <small class="text-muted">{{ s.age }}</small>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+
+
+                        <td>
+                            <a href="{% url 'student-edit' s.pk %}" class="btn btn-sm btn-circle btn-primary"
+                                title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'student-delete' s.pk %}" class="btn btn-sm btn-circle btn-danger ms-1"
+                                title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">No student data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
