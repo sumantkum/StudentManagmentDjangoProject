@@ -4,13 +4,13 @@ A web-based Student Management System built using the Django framework. This sys
 
 ---
 
-## 📝 Project Description
+## Project Description
 
 This Django-based web application helps manage student information efficiently. It provides a simple interface for admin users to perform CRUD (Create, Read, Update, Delete) operations on student records.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Add new students
 - Edit and update existing student data
